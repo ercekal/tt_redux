@@ -21,6 +21,22 @@
 .App-intro {
   font-size: large;
 }
+.input {
+  border: 1px solid black;
+  padding-left: 10px;
+}
+.revisionBox {
+  border: 1px solid black;
+  min-width: 200px;
+  min-height: 100px;
+  padding: 5px;
+}
+.header {
+  padding: 10px 0;
+}
+.main {
+  margin: 20px;
+}
 
 @keyframes App-logo-spin {
   from { transform: rotate(0deg); }
