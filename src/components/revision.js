@@ -22,7 +22,7 @@ class Revision extends Component {
         </div>
         <br/>
         <div className='revisionBox'>
-          {this.state.data}
+          {this.props.revisionData}
         </div>
       </div>
     )
@@ -38,15 +38,8 @@ class Revision extends Component {
   }
 
   render() {
-    const { revisionData } = this.props
-    if (revisionData) {
-      console.log(this.props)
-      return (
-        <div>
-          {this._renderRevision()}
-          yolo
-        </div>
-      )
+    if (this.props.revisionData) {
+      return this._renderRevision()
     }
     return (
       <div>
@@ -61,7 +54,6 @@ function mapDispatchToProps(dispatch) {
 }
 
 function mapStateToProps(state) {
-  console.log(state)
   return {
     revisionData: state.revisionData.revisionData,
   }
