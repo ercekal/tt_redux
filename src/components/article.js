@@ -2,10 +2,9 @@ import _ from 'lodash'
 import React, { Component } from 'react';
 import PropTypes from 'prop-types'
 import { Link } from 'react-router-dom'
-import axios from 'axios'
 import { connect } from 'react-redux'
-
-const DOMAIN = 'http://0.0.0.0:5003/page/'
+import { fetchRevisions, addRevision } from '../actions/index';
+import { bindActionCreators } from 'redux';
 
 class Article extends Component {
   // static propTypes = {
@@ -16,30 +15,15 @@ class Article extends Component {
   state = {
     newData: '',
   }
-  componentWillMount () {
+  componentWillMount() {
     this.setState({
-      title: this.props.match.params.articleTitle,
+      title: this.props.match.params.articleTitle
     })
+    this.props.fetchRevisions(this.props.match.params.articleTitle)
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.articleFetch.value) {
-      const revisions = nextProps.articleFetch.value.revisions
-      const lastRevision = _.last(nextProps.articleFetch.value.revisions)
-      this.setState({
-        revisions: revisions,
-        lastRevisionNo: lastRevision,
-      })
-    axios.get(`${DOMAIN}${this.state.title}/${lastRevision}`)
-    .then(res => {
-      this.setState({
-        lastRevisionData: res.data.data,
-      })
-    })
-    .catch(error => {
-      console.log(error)
-    })
-    }
+  componentDidMount () {
+    console.log(this.props.revisions)
   }
 
   handleChange = event => {
@@ -78,44 +62,44 @@ class Article extends Component {
     // this._checkResponse()
   }
 
-  renderLatest (lastRevision) {
-    const {title} = this.state
-    axios.get(`${DOMAIN}${title}/${lastRevision}`)
-    .then(res => {
-      this.setState({
-        lastRevision: res.data.data
-      })
-    })
-    .catch(error => {
-      console.log(error)
-    })
+  // renderLatest (lastRevision) {
+  //   const {title} = this.state
+  //   axios.get(`${DOMAIN}${title}/${lastRevision}`)
+  //   .then(res => {
+  //     this.setState({
+  //       lastRevision: res.data.data
+  //     })
+  //   })
+  //   .catch(error => {
+  //     console.log(error)
+  //   })
 
-    return (
-      <div>
-        <div>
-          <div className='header'>
-            Last revision
-          </div>
-          <Link to={`/${title}/revisions/${lastRevision}`} className='revision'>{lastRevision}</Link>
-        </div>
-        <div className='header'>
-          Content
-        </div>
-        <div className='revisionBox'>
-          {this.state.lastRevision}
-        </div>
-      </div>
-    )
-  }
+  //   return (
+  //     <div>
+  //       <div>
+  //         <div className='header'>
+  //           Last revision
+  //         </div>
+  //         <Link to={`/${title}/revisions/${lastRevision}`} className='revision'>{lastRevision}</Link>
+  //       </div>
+  //       <div className='header'>
+  //         Content
+  //       </div>
+  //       <div className='revisionBox'>
+  //         {this.state.lastRevision}
+  //       </div>
+  //     </div>
+  //   )
+  // }
 
   renderFirstRevisions () {
-    let {revisions} = this.state
+    let {revisions} = this.props
     var firstRevisions = revisions.slice(0, -1)
 
     return firstRevisions.map((revision, i) => {
       return (
         <div key={i}>
-          <Link to={`/${this.props.match.params.articleTitle}/revisions/${revision}`}>{revision}</Link>
+          <Link to={`/${this.state.title}/revisions/${revision}`}>{revision}</Link>
         </div>
       )
     })
@@ -141,50 +125,63 @@ class Article extends Component {
   }
 
   render() {
-    const { articleFetch } = this.props
-    const { articleTitle } = this.props.match.params
-    if (articleFetch.pending) {
-      return (
-        <div>
-          Loading...
-        </div>
-      )
-    } else if (articleFetch.rejected) {
-      return (
-        <div>
-          Rejected...
-        </div>
-      )
-    } else if (articleFetch.fulfilled) {
-      const lastRevision = _.last(articleFetch.value.revisions)
+    if (this.props.revisions) {
       return (
         <div>
           <Link to='/'>Home</Link>
           <div className='header'>
             Title
           </div>
-          <strong>{articleTitle}</strong>
-          {this.renderLatest(lastRevision)}
+          <strong>{this.state.title}</strong>
+          {/* {this.renderLatest(lastRevision)} */}
           <div className='header'>
             Other revisions
           </div>
           <div className='firstRevisions'>
             {this.renderFirstRevisions()}
           </div>
-          {this.renderNewInput()}
+          {/* {this.renderNewInput()} */}
         </div>
       )
     }
+      return (
+        <div>
+          Loading...
+        </div>
+      )
+
+    // } else if (articleFetch.fulfilled) {
+    //   const lastRevision = _.last(articleFetch.value.revisions)
+    //   return (
+    //     <div>
+    //       <Link to='/'>Home</Link>
+    //       <div className='header'>
+    //         Title
+    //       </div>
+    //       <strong>{articleTitle}</strong>
+    //       {this.renderLatest(lastRevision)}
+    //       <div className='header'>
+    //         Other revisions
+    //       </div>
+    //       <div className='firstRevisions'>
+    //         {this.renderFirstRevisions()}
+    //       </div>
+    //       {this.renderNewInput()}
+    //     </div>
+    //   )
+    // }
   }
 }
 
-export default connect((props) => ({
-  articleFetch: `${DOMAIN}${props.match.params.articleTitle}`,
-  postRevision: page => ({
-    postRevisionResponse: {
-      url: `${DOMAIN}${props.match.params.articleTitle}`,
-      method: 'POST',
-      body: JSON.stringify({ page }),
-    }
-  })
-}))(Article)
+function mapDispatchToProps(dispatch) {
+  return bindActionCreators({ fetchRevisions, addRevision }, dispatch)
+}
+
+function mapStateToProps(state) {
+  console.log(state.revisions.revisions)
+  return {
+    revisions: state.revisions.revisions,
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Article);

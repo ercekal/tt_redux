@@ -2,6 +2,7 @@ import axios from 'axios'
 
 export const FETCH_TITLES = 'FETCH_TITLES';
 export const FETCH_REVISIONS = 'FETCH_REVISIONS';
+export const FETCH_REVISION = 'FETCH_REVISION';
 export const ADD_REVISION = 'ADD_REVISION';
 
 export function fetchTitles() {
@@ -20,10 +21,22 @@ export function fetchTitles() {
 export function fetchRevisions(title) {
   return dispatch => {
     axios.get(`http://0.0.0.0:5003/page/${title}`)
-    .then((res) => {
+    .then(res => {
       dispatch({
         type: FETCH_REVISIONS,
-        payload: res.data
+        payload: res.data.revisions
+      })
+    })
+  }
+}
+
+export function fetchRevision(title, revision) {
+  return dispatch => {
+    axios.get(`http://0.0.0.0:5003/page/${title}/${revision}`)
+    .then(res => {
+      dispatch({
+        type: FETCH_REVISION,
+        payload: res.data.data
       })
     })
   }

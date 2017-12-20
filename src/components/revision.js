@@ -1,69 +1,70 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types'
-import { connect, PromiseState} from 'react-refetch'
 import { Link } from 'react-router-dom'
+import { fetchRevision } from '../actions/index';
+import { bindActionCreators } from 'redux';
+import { connect } from 'react-redux'
 
 class Revision extends Component {
-  static propTypes = {
-    revisionFetch: PropTypes.instanceOf(PromiseState).isRequired,
-  }
+  // static propTypes = {
+  //   revisionFetch: PropTypes.instanceOf(PromiseState).isRequired,
+  // }
 
-  state = {}
-
-  componentWillReceiveProps(nextProps, nextState) {
-    if (nextProps.revisionFetch.value) {
-      const {data} = nextProps.revisionFetch.value
-      this.setState({
-        data: data,
-        updated: true,
-      })
-    }
-  }
-
-  _renderRevisions () {
-    const {title} = this.props.revisionFetch.value
-    if (this.state.updated) {
-      return (
-        <div>
-          <div className='title'>
-            Title =>  <Link to={`/articles/${title}`}>{title}</Link>
-          </div>
-          <div className='revisionNo'>
-            Revision no =>  {this.props.match.params.revisionNo}
-          </div>
-          <br/>
-          <div className='revisionBox'>
-            {this.state.data}
-          </div>
+  _renderRevision () {
+    const {title, revisionNo} = this.state
+    return (
+      <div>
+        <div className='title'>
+          Title =>  <Link to={`/articles/${title}`}>{title}</Link>
         </div>
-      )
-    }
+        <div className='revisionNo'>
+          Revision no =>  {revisionNo}
+        </div>
+        <br/>
+        <div className='revisionBox'>
+          {this.state.data}
+        </div>
+      </div>
+    )
+  }
+
+  componentWillMount() {
+    const {articleTitle, revisionNo} =this.props.match.params
+    this.setState({
+      title: articleTitle,
+      revisionNo: revisionNo,
+    })
+    this.props.fetchRevision(articleTitle, revisionNo)
   }
 
   render() {
-    const { revisionFetch } = this.props
-    if (revisionFetch.pending) {
+    const { revisionData } = this.props
+    if (revisionData) {
+      console.log(this.props)
       return (
         <div>
-          Loading...
+          {this._renderRevision()}
+          yolo
         </div>
       )
-    } else if (revisionFetch.rejected) {
-      return (
-        <div>
-          Rejected...
-        </div>
-      )
-    } else if (revisionFetch.fulfilled) {
-      return <div>
-        <div>
-          {this._renderRevisions()}
-        </div>
-      </div>
     }
+    return (
+      <div>
+        Loading...
+      </div>
+    )
   }
 }
 
-export default connect(props => ({
-  revisionFetch: `http://0.0.0.0:5003/page/${props.match.params.articleTitle}/${props.match.params.revisionNo}`,
-}))(Revision)
+function mapDispatchToProps(dispatch) {
+  return bindActionCreators({ fetchRevision }, dispatch)
+}
+
+function mapStateToProps(state) {
+  console.log(state)
+  return {
+    revisionData: state.revisionData.revisionData,
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Revision);
