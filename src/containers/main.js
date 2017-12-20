@@ -1,8 +1,8 @@
 import React from 'react'
 import { Switch, Route } from 'react-router-dom'
-import Titles from './titles'
-import Article from '../components/article'
-import Revision from '../components/revision'
+import Titles from './Titles'
+import Article from '../components/Article'
+import Revision from '../components/Revision'
 
 const Main = () => (
   <main className='main'>
