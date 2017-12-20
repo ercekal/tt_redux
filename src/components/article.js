@@ -7,11 +7,11 @@ import { fetchRevisions, fetchRevision, addRevision } from '../actions/index';
 import { bindActionCreators } from 'redux';
 
 class Article extends Component {
-  // static propTypes = {
-  //   articleFetch: PropTypes.instanceOf(PromiseState).isRequired,
-  //   postRevision: PropTypes.func.isRequired,
-  //   postRevisionResponse: PropTypes.instanceOf(PromiseState),
-  // }
+  static propTypes = {
+    articleFetch: PropTypes.array,
+    revisionData: PropTypes.string,
+    revisionStatus: PropTypes.string
+  }
   state = {
     newData: '',
   }
@@ -23,8 +23,12 @@ class Article extends Component {
     this.props.fetchRevisions(this.props.match.params.articleTitle)
   }
 
-  componentDidMount () {
-    console.log(this.props.revisions)
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.revisions !== this.props.revisions) {
+      this.setState({
+        lastRevisionCalled: false
+      })
+    }
   }
 
   handleChange = event => {
@@ -38,11 +42,24 @@ class Article extends Component {
       page: newData
     }
     this.props.addRevision(title, data)
+    this.setState({
+      newData: '',
+    })
+  }
+
+  _renderLastRevisionData () {
+
   }
 
   renderLatest (lastRevision) {
     const {title} = this.state
-    this.props.fetchRevision(title, lastRevision)
+    if (!this.state.lastRevisionCalled) {
+      this.props.fetchRevision(title, lastRevision)
+      this.setState({
+        lastRevisionCalled: true,
+        lastRevisionData: this.props.revisionData,
+      })
+    }
     return (
       <div>
         <div>
@@ -123,13 +140,14 @@ class Article extends Component {
 }
 
 function mapDispatchToProps(dispatch) {
-  return bindActionCreators({ fetchRevisions, fetchRevision, addRevision, fetchRevision }, dispatch)
+  return bindActionCreators({ fetchRevisions, fetchRevision, addRevision }, dispatch)
 }
 
 function mapStateToProps(state) {
   return {
     revisions: state.revisions.revisions,
     revisionData: state.revisionData.revisionData,
+    revisionStatus: state.revisions.revisionStatus
   }
 }
 

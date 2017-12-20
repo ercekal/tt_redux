@@ -6,9 +6,9 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux'
 
 class Revision extends Component {
-  // static propTypes = {
-  //   revisionFetch: PropTypes.instanceOf(PromiseState).isRequired,
-  // }
+  static propTypes = {
+    revisionData: PropTypes.string,
+  }
 
   _renderRevision () {
     const {title, revisionNo} = this.state

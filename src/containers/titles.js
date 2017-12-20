@@ -14,13 +14,8 @@ class Titles extends Component {
     this.props.fetchTitles()
   }
 
-  componentDidMount () {
-    console.log(this.props)
-  }
-
   _renderTitles () {
     if (this.props.titles) {
-      console.log(this.props)
       return this.props.titles.map((title, i) => {
         return (
           <div key={i}>
